@@ -41,11 +41,9 @@ jobs:
       # Skip Jekyll processing of the static build output.
       - run: touch dist/.nojekyll
 
-      # enablement: turn Pages on automatically if it isn't already, so the
-      # very first run can deploy without a manual Settings toggle.
+      # Pages must be enabled once in repo Settings → Pages → Source:
+      # "GitHub Actions". After that, this step and every future run succeed.
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:
