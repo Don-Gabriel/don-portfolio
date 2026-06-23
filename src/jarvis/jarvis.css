@@ -759,6 +759,49 @@
 }
 @keyframes boottitle { to { opacity: 1; } }
 
+/* reactor charge bar */
+.boot-charge { width: min(440px, 86vw); display: flex; flex-direction: column; gap: 0.5rem; }
+.boot-charge-track {
+  height: 4px;
+  background: var(--cyan-08);
+  border: 1px solid var(--cyan-22);
+  overflow: hidden;
+}
+.boot-charge-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--cyan), var(--gold));
+  box-shadow: 0 0 12px var(--cyan);
+  transition: width 0.36s var(--ease-hud);
+}
+.boot-charge-pct {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  color: var(--dim);
+  text-align: right;
+}
+/* per-line reveal */
+.boot-line { animation: bootline 0.3s var(--ease-hud); }
+@keyframes bootline {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+/* power-on CRT flash when the HUD takes over */
+.boot-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 102;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 45%, var(--cyan), transparent 60%);
+  opacity: 0;
+}
+.boot-flash.fire { animation: bootflash 0.9s ease-out forwards; }
+@keyframes bootflash {
+  0% { opacity: 0; }
+  18% { opacity: 0.65; }
+  100% { opacity: 0; }
+}
+
 /* skip button */
 .skip {
   position: fixed;
@@ -830,9 +873,12 @@
   .jarvis-line .cursor,
   .card .card-scan,
   .bar .fill-shine,
-  .chip-live .pip {
+  .chip-live .pip,
+  .boot-flash.fire,
+  .boot-line {
     animation: none !important;
   }
+  .boot-flash.fire { opacity: 0 !important; }
   .view,
   .detail { animation-duration: 0.001s !important; }
   .bar .fill { animation: none !important; }
