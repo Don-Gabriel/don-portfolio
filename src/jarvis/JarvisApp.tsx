@@ -9,6 +9,7 @@ import { Scramble } from './Scramble'
 import { HudButton } from './HudButton'
 import { Ico, type IconName } from './Icons'
 import { CountUp, MetricValue } from './CountUp'
+import { CommandPalette } from './CommandPalette'
 import { stagger, fadeRise, spring, viewContainer, backdrop, dialogPanel } from './motion'
 import { useJarvis, type ModuleId } from '../state/useJarvis'
 import { UNIVERSE, IDENTITY, galaxyById, type Entity } from '../data/universe'
@@ -97,6 +98,7 @@ export default function JarvisApp() {
 
         <JarvisLine module={module} muted={muted} />
 
+        <CommandPalette />
         <Reticle />
         {!booted && <Boot onDone={() => useJarvis.getState().setBooted(true)} />}
       </div>
@@ -124,6 +126,15 @@ function TopBar() {
         GABRIEL&nbsp;<span style={{ opacity: 0.5 }}>// J.A.R.V.I.S.</span>
       </div>
       <div className="top-stat">
+        <button
+          className="cmdk-trigger"
+          onClick={() => window.dispatchEvent(new Event('jarvis:cmdk'))}
+          aria-label="Open command palette"
+        >
+          <Ico name="command" size={13} />
+          <span className="hide-sm">Command</span>
+          <kbd>⌘K</kbd>
+        </button>
         <span>REACTOR <b>100%</b></span>
         <span className="hide-sm">CORE <b>NOMINAL</b></span>
         <span>{clock}</span>
