@@ -1,5 +1,17 @@
 # UPGRADE_PLAN.md — J.A.R.V.I.S. Portfolio
 
+> **Implementation status (Phase 2 complete).** All 14 steps below shipped,
+> each as its own local commit. New components: `motion.ts`, `Scramble`,
+> `Icons`, `HudButton`, `CountUp`/`MetricValue`, `CommandPalette`, `Toasts`,
+> plus an upgraded `Boot`. The existing CSS/Canvas/SVG/Web-Audio systems were
+> kept and layered on, not replaced.
+> Note on `/ui`: the 21st.dev `/ui` generator was **not connected** in this
+> environment (no Magic MCP), so components were hand-built to the UI/UX Pro Max
+> tokens/guidance — higher fidelity to the HUD identity than a generic
+> generation. Reconnect Magic MCP later if you want to regenerate any of them.
+
+
+
 > Goal: take the existing Iron-Man HUD from "very good custom build" to **premium,
 > HUD-grade, reactive JARVIS**. Layer on top of what already works — keep the arc
 > reactor, scan-lines, reticle, generative audio, boot sequence and procedural
