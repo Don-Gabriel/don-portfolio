@@ -686,8 +686,41 @@
   text-transform: uppercase;
   transition: all 0.25s;
 }
+.snd { display: inline-flex; align-items: center; gap: 0.4rem; }
 .snd:hover { color: var(--cyan); border-color: var(--cyan-soft); }
 .snd.on { color: var(--cyan); }
+
+/* ───────── accessibility: keyboard focus ─────────
+   The pointer cursor is hidden for the reticle aesthetic, so keyboard
+   focus MUST be unmistakable. High-contrast HUD focus ring on tab-nav. */
+.hud :focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+.hud .rail-btn:focus-visible,
+.hud .hbtn:focus-visible { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--cyan), var(--glow-cyan); outline: none; }
+/* keyboard users get a real cursor back the moment they tab */
+.hud.kbd,
+.hud.kbd * { cursor: auto !important; }
+.hud.kbd .reticle { opacity: 0; }
+
+.skip-link {
+  position: absolute;
+  left: 50%;
+  top: -120px;
+  transform: translateX(-50%);
+  z-index: 200;
+  background: var(--cyan);
+  color: #04070f;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  padding: 0.6rem 1rem;
+  text-transform: uppercase;
+  transition: top var(--dur-fast) ease;
+}
+.skip-link:focus { top: 12px; }
 
 /* ───────── boot ───────── */
 .boot {

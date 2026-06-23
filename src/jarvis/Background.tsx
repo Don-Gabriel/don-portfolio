@@ -42,7 +42,22 @@ export function Background() {
     }
     window.addEventListener('pointermove', move)
 
+    // Honour reduced-motion: paint a single static frame, skip the loop.
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    // Pause the rAF loop while the tab is hidden — no point burning cycles.
+    let hidden = document.hidden
+    const onVis = () => {
+      const wasHidden = hidden
+      hidden = document.hidden
+      if (wasHidden && !hidden && !reduce) {
+        raf = requestAnimationFrame(tick)
+      }
+    }
+    document.addEventListener('visibilitychange', onVis)
+
     const tick = () => {
+      if (hidden) return // loop resumes on visibilitychange
       ctx.clearRect(0, 0, w, h)
       for (const p of pts) {
         p.x += p.vx
@@ -73,14 +88,15 @@ export function Background() {
         ctx.fillStyle = `rgba(79,227,255,${0.25 + tw * 0.5})`
         ctx.fill()
       }
-      raf = requestAnimationFrame(tick)
+      if (!reduce) raf = requestAnimationFrame(tick)
     }
-    tick()
+    tick() // paints once; under reduced-motion it stays a static field
 
     return () => {
       cancelAnimationFrame(raf)
       window.removeEventListener('resize', resize)
       window.removeEventListener('pointermove', move)
+      document.removeEventListener('visibilitychange', onVis)
     }
   }, [])
 

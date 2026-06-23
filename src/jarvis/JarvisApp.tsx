@@ -44,9 +44,28 @@ export default function JarvisApp() {
   const detail =
     galaxyById(module)?.entities.find((e) => e.id === detailId) ?? undefined
 
+  // Detect keyboard navigation → restore the real cursor + show focus rings.
+  // Pointer activity switches back to the immersive reticle.
+  useEffect(() => {
+    const hud = document.querySelector('.hud')
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Tab') hud?.classList.add('kbd')
+    }
+    const onPointer = () => hud?.classList.remove('kbd')
+    window.addEventListener('keydown', onKey)
+    window.addEventListener('pointerdown', onPointer)
+    window.addEventListener('pointermove', onPointer)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('pointerdown', onPointer)
+      window.removeEventListener('pointermove', onPointer)
+    }
+  }, [])
+
   return (
     <MotionConfig reducedMotion="user">
       <div className="hud">
+        <a className="skip-link" href="#hud-stage">Skip to content</a>
         <div className="hud-bg" />
         <Background />
         <div className="hud-grid" />
@@ -61,7 +80,7 @@ export default function JarvisApp() {
         <TopBar />
         <Rail />
 
-        <div className="stage">
+        <div className="stage" id="hud-stage">
           <AnimatePresence mode="wait">
             <View module={module} key={module} />
           </AnimatePresence>
@@ -172,8 +191,11 @@ function JarvisLine({ module, muted }: { module: ModuleId; muted: boolean }) {
       <button
         className={`snd ${muted ? '' : 'on'}`}
         onClick={() => useJarvis.getState().toggleMute()}
+        aria-label={muted ? 'Sound off — click to enable' : 'Sound on — click to mute'}
+        aria-pressed={!muted}
       >
-        {muted ? '♪ sound off' : '♪ sound on'}
+        <Ico name={muted ? 'sound-off' : 'sound-on'} size={14} />
+        {muted ? 'sound off' : 'sound on'}
       </button>
     </div>
   )
