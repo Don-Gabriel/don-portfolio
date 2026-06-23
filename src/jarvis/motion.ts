@@ -33,6 +33,24 @@ export const stagger = (gap = 0.07, delay = 0): Variants => ({
   },
 })
 
+/**
+ * View container — staggers its children in, and slides/blurs out on exit
+ * (used with AnimatePresence mode="wait" for module transitions).
+ */
+export const viewContainer: Variants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.07, delayChildren: 0.06 },
+  },
+  exit: {
+    opacity: 0,
+    y: -12,
+    filter: 'blur(6px)',
+    transition: { duration: 0.3, ease: easeHud },
+  },
+}
+
 /** Rise + fade — the default entrance for cards, rows, chips. */
 export const fadeRise: Variants = {
   hidden: { opacity: 0, y: 16, filter: 'blur(6px)' },

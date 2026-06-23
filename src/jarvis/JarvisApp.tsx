@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+import { useEffect, useRef, useState } from 'react'
+import { motion, AnimatePresence, MotionConfig } from 'framer-motion'
 import './jarvis.css'
 import { Background } from './Background'
 import { Reticle } from './Reticle'
@@ -8,7 +8,8 @@ import { Boot } from './Boot'
 import { Scramble } from './Scramble'
 import { HudButton } from './HudButton'
 import { Ico, type IconName } from './Icons'
-import { stagger, fadeRise, spring } from './motion'
+import { CountUp, MetricValue } from './CountUp'
+import { stagger, fadeRise, spring, viewContainer, backdrop, dialogPanel } from './motion'
 import { useJarvis, type ModuleId } from '../state/useJarvis'
 import { UNIVERSE, IDENTITY, galaxyById, type Entity } from '../data/universe'
 import { coverArt } from '../art/cover'
@@ -44,31 +45,43 @@ export default function JarvisApp() {
     galaxyById(module)?.entities.find((e) => e.id === detailId) ?? undefined
 
   return (
-    <div className="hud">
-      <div className="hud-bg" />
-      <Background />
-      <div className="hud-grid" />
-      <div className="hud-scan" />
-      <div className="hud-vignette" />
+    <MotionConfig reducedMotion="user">
+      <div className="hud">
+        <div className="hud-bg" />
+        <Background />
+        <div className="hud-grid" />
+        <div className="hud-scan" />
+        <div className="hud-vignette" />
 
-      <span className="hud-corner tl" />
-      <span className="hud-corner tr" />
-      <span className="hud-corner bl" />
-      <span className="hud-corner br" />
+        <span className="hud-corner tl" />
+        <span className="hud-corner tr" />
+        <span className="hud-corner bl" />
+        <span className="hud-corner br" />
 
-      <TopBar />
-      <Rail />
+        <TopBar />
+        <Rail />
 
-      <div className="stage">
-        <View module={module} key={module} />
-        {detail && <Detail entity={detail} accent={galaxyById(module)?.color} />}
+        <div className="stage">
+          <AnimatePresence mode="wait">
+            <View module={module} key={module} />
+          </AnimatePresence>
+          <AnimatePresence>
+            {detail && (
+              <Detail
+                key="detail"
+                entity={detail}
+                accent={galaxyById(module)?.color}
+              />
+            )}
+          </AnimatePresence>
+        </div>
+
+        <JarvisLine module={module} muted={muted} />
+
+        <Reticle />
+        {!booted && <Boot onDone={() => useJarvis.getState().setBooted(true)} />}
       </div>
-
-      <JarvisLine module={module} muted={muted} />
-
-      <Reticle />
-      {!booted && <Boot onDone={() => useJarvis.getState().setBooted(true)} />}
-    </div>
+    </MotionConfig>
   )
 }
 
@@ -182,6 +195,7 @@ function Home() {
       variants={stagger(0.16, 0.1)}
       initial="hidden"
       animate="show"
+      exit={{ opacity: 0, scale: 0.96, filter: 'blur(6px)', transition: { duration: 0.3 } }}
     >
       <motion.div
         variants={{
@@ -224,11 +238,15 @@ function Home() {
 function ViewHead({ idx, title, sub }: { idx: string; title: string; sub: string }) {
   return (
     <>
-      <div className="view-title">
+      <motion.div className="view-title" variants={fadeRise}>
         <span className="idx">{idx}</span>
-        <h2>{title}</h2>
-      </div>
-      <div className="view-sub">{sub}</div>
+        <h2>
+          <Scramble text={title} speed={22} delay={120} />
+        </h2>
+      </motion.div>
+      <motion.div className="view-sub" variants={fadeRise}>
+        {sub}
+      </motion.div>
     </>
   )
 }
@@ -236,12 +254,18 @@ function ViewHead({ idx, title, sub }: { idx: string; title: string; sub: string
 function Projects() {
   const g = galaxyById('projects')!
   return (
-    <div className="view">
+    <motion.div className="view" variants={viewContainer} initial="hidden" animate="show" exit="exit">
       <ViewHead idx="01" title="SYSTEMS" sub={`${g.entities.length} projects · select for full diagnostics`} />
       <div className="grid">
         {g.entities.map((e) => (
-          <button key={e.id} className="card" onClick={() => useJarvis.getState().openDetail(e.id)}>
+          <motion.button
+            key={e.id}
+            className="card"
+            variants={fadeRise}
+            onClick={() => useJarvis.getState().openDetail(e.id)}
+          >
             <div className="cover" style={{ backgroundImage: `url(${coverArt(e.id, g.color)})` }} />
+            <span className="card-scan" aria-hidden="true" />
             {e.status && <span className="status">{e.status}</span>}
             <div className="body">
               <div className="name">{e.name}</div>
@@ -252,10 +276,10 @@ function Projects() {
                 ))}
               </div>
             </div>
-          </button>
+          </motion.button>
         ))}
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -268,28 +292,40 @@ function pct(name: string): number {
 function Skills() {
   const g = galaxyById('skills') ?? galaxyById('knowledge')!
   return (
-    <div className="view">
+    <motion.div className="view" variants={viewContainer} initial="hidden" animate="show" exit="exit">
       <ViewHead idx="02" title="CAPABILITY MATRIX" sub="real-time skill diagnostics" />
       <div className="diag">
         {g.entities.map((cluster) => (
-          <div className="diag-group" key={cluster.id}>
+          <motion.div className="diag-group" key={cluster.id} variants={fadeRise}>
             <h4>{cluster.name}</h4>
-            {(cluster.tech ?? []).map((t) => {
-              const v = pct(t)
-              return (
-                <div className="bar" key={t}>
-                  <div className="bl">
-                    <span>{t}</span>
-                    <span>{v}%</span>
-                  </div>
-                  <div className="track">
-                    <div className="fill" style={{ width: `${v}%` }} />
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+            {(cluster.tech ?? []).map((t) => (
+              <SkillBar key={t} label={t} value={pct(t)} />
+            ))}
+          </motion.div>
         ))}
+      </div>
+    </motion.div>
+  )
+}
+
+function SkillBar({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="bar">
+      <div className="bl">
+        <span>{label}</span>
+        <span><CountUp to={value} suffix="%" /></span>
+      </div>
+      <div className="track">
+        <motion.div
+          className="fill"
+          initial={{ scaleX: 0 }}
+          whileInView={{ scaleX: 1 }}
+          viewport={{ once: true, margin: '-40px' }}
+          transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+          style={{ width: `${value}%`, transformOrigin: 'left' }}
+        >
+          <span className="fill-shine" />
+        </motion.div>
       </div>
     </div>
   )
@@ -304,11 +340,11 @@ function RowsView({ module }: { module: ModuleId }) {
   const g = galaxyById(module)!
   const meta = map[module] ?? { idx: '00', title: g.name.toUpperCase(), sub: g.essence }
   return (
-    <div className="view">
+    <motion.div className="view" variants={viewContainer} initial="hidden" animate="show" exit="exit">
       <ViewHead idx={meta.idx} title={meta.title} sub={meta.sub} />
       <div className="rows">
         {g.entities.map((e) => (
-          <div className="rowcard" key={e.id}>
+          <motion.div className="rowcard" key={e.id} variants={fadeRise}>
             <h3>{e.name}</h3>
             <div className="meta">
               {[e.year, e.status, e.tagline].filter(Boolean).join('  ·  ')}
@@ -325,56 +361,118 @@ function RowsView({ module }: { module: ModuleId }) {
               <div className="detail-metrics" style={{ marginTop: '1rem' }}>
                 {e.metrics.map((m) => (
                   <div className="m" key={m.label}>
-                    <div className="v">{m.value}</div>
+                    <div className="v"><MetricValue value={m.value} /></div>
                     <div className="l">{m.label}</div>
                   </div>
                 ))}
               </div>
             )}
-          </div>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   )
 }
 
 function Contact() {
   return (
-    <div className="view">
+    <motion.div className="view" variants={viewContainer} initial="hidden" animate="show" exit="exit">
       <div className="contact-wrap">
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <motion.div style={{ display: 'flex', justifyContent: 'center' }} variants={fadeRise}>
           <Reactor size={140} />
-        </div>
-        <div className="role" style={{ color: 'var(--gold)', marginTop: '1.2rem', fontFamily: 'var(--mono)', letterSpacing: '0.24em' }}>
-          SECURE CHANNEL OPEN
-        </div>
-        <div className="big">Let's build something.</div>
-        <a className="em" href={`mailto:${IDENTITY.email}`}>{IDENTITY.email}</a>
-        <div className="contact-links">
+        </motion.div>
+        <motion.div
+          className="role"
+          variants={fadeRise}
+          style={{ color: 'var(--gold)', marginTop: '1.2rem', fontFamily: 'var(--mono)', letterSpacing: '0.24em' }}
+        >
+          <Scramble text="SECURE CHANNEL OPEN" speed={26} delay={200} />
+        </motion.div>
+        <motion.div className="big" variants={fadeRise}>Let's build something.</motion.div>
+        <motion.a className="em" href={`mailto:${IDENTITY.email}`} variants={fadeRise}>
+          {IDENTITY.email}
+        </motion.a>
+        <motion.div className="contact-links" variants={fadeRise}>
           {IDENTITY.socials.map((s) => (
-            <a key={s.label} className="hbtn" href={s.url} target="_blank" rel="noreferrer">
-              {s.label} ↗
-            </a>
+            <HudButton key={s.label} href={s.url} target="_blank">
+              {s.label} <Ico name="external" size={15} />
+            </HudButton>
           ))}
           {IDENTITY.resumeUrl && (
-            <a className="hbtn solid" href={IDENTITY.resumeUrl} target="_blank" rel="noreferrer">
-              ⤓ Résumé
-            </a>
+            <HudButton solid href={IDENTITY.resumeUrl} target="_blank">
+              <Ico name="download" size={15} /> Résumé
+            </HudButton>
           )}
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 
-/* ───────── detail overlay ───────── */
+/* ───────── detail overlay (focus-trapped dialog) ───────── */
 function Detail({ entity, accent }: { entity: Entity; accent?: string }) {
+  const panelRef = useRef<HTMLDivElement>(null)
+  const close = () => useJarvis.getState().openDetail(null)
+
+  useEffect(() => {
+    const prevFocus = document.activeElement as HTMLElement | null
+    // focus the panel for screen readers + keyboard
+    panelRef.current?.focus()
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        close()
+        return
+      }
+      if (e.key === 'Tab') {
+        const focusables = panelRef.current?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        )
+        if (!focusables || focusables.length === 0) return
+        const first = focusables[0]
+        const last = focusables[focusables.length - 1]
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault()
+          last.focus()
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault()
+          first.focus()
+        }
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      prevFocus?.focus?.()
+    }
+  }, [entity.id])
+
   return (
-    <div className="detail" onClick={() => useJarvis.getState().openDetail(null)}>
-      <button className="hbtn detail-close" onClick={() => useJarvis.getState().openDetail(null)}>
-        ✕ Close
-      </button>
-      <div className="detail-panel" onClick={(e) => e.stopPropagation()}>
+    <motion.div
+      className="detail"
+      onClick={close}
+      variants={backdrop}
+      initial="hidden"
+      animate="show"
+      exit="exit"
+    >
+      <motion.div
+        ref={panelRef}
+        className="detail-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-label={entity.name}
+        tabIndex={-1}
+        onClick={(e) => e.stopPropagation()}
+        variants={dialogPanel}
+        initial="hidden"
+        animate="show"
+        exit="exit"
+      >
+        <button className="hbtn detail-close" onClick={close} aria-label="Close">
+          <Ico name="close" size={15} /> Close
+        </button>
         <div
           className="detail-cover"
           style={{ backgroundImage: `url(${coverArt(entity.id, accent)})` }}
@@ -392,7 +490,7 @@ function Detail({ entity, accent }: { entity: Entity; accent?: string }) {
             <div className="detail-metrics">
               {entity.metrics.map((m) => (
                 <div className="m" key={m.label}>
-                  <div className="v">{m.value}</div>
+                  <div className="v"><MetricValue value={m.value} /></div>
                   <div className="l">{m.label}</div>
                 </div>
               ))}
@@ -408,15 +506,15 @@ function Detail({ entity, accent }: { entity: Entity; accent?: string }) {
           {entity.links && entity.links.length > 0 && (
             <div className="detail-links">
               {entity.links.map((l) => (
-                <a key={l.label} className="hbtn" href={l.url} target="_blank" rel="noreferrer">
-                  {l.label} ↗
-                </a>
+                <HudButton key={l.label} href={l.url} target="_blank">
+                  {l.label} <Ico name="external" size={15} />
+                </HudButton>
               ))}
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 
