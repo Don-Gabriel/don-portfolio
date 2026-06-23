@@ -6,3 +6,6 @@ dist-ssr
 .vite
 node_modules/.tmp
 *.log
+
+# TypeScript incremental build cache
+*.tsbuildinfo

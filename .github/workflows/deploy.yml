@@ -1,0 +1,62 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Allow the workflow to publish to Pages via OIDC.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time; cancel superseded runs.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build (subpath base for Pages)
+        run: npm run build
+        env:
+          GITHUB_PAGES: 'true'
+
+      # SPA fallback: Pages serves 404.html for unknown routes, so a copy of
+      # index.html lets the /admin route (and refreshes) boot the app.
+      - run: cp dist/index.html dist/404.html
+
+      # Skip Jekyll processing of the static build output.
+      - run: touch dist/.nojekyll
+
+      # enablement: turn Pages on automatically if it isn't already, so the
+      # very first run can deploy without a manual Settings toggle.
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

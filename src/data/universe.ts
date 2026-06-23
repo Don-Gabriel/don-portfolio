@@ -86,7 +86,9 @@ export const IDENTITY: Identity = {
   location: 'Kanyakumari, Tamil Nadu, India · open to remote',
   available: true,
   email: 'dongabriel.jrks@gmail.com',
-  resumeUrl: '/resume.pdf',
+  // BASE_URL is '/' on root deploys (Vercel/Netlify) and '/don-portfolio/' on
+  // GitHub Pages, so the résumé resolves correctly on either.
+  resumeUrl: `${import.meta.env.BASE_URL}resume.pdf`,
   creed: 'Discipline becomes consistency. Consistency becomes creation.',
   color: '#ffe4a8',
   socials: [

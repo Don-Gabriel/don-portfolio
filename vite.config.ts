@@ -1,8 +1,18 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+// Minimal typing for the Node global (no @types/node dependency needed).
+declare const process: { env: Record<string, string | undefined> }
+
 // ETERNUM build config — kept intentionally lean so the cosmos boots fast.
+//
+// `base` is '/' for local dev and root deploys (Vercel/Netlify), but the
+// GitHub Pages workflow sets GITHUB_PAGES=true so assets resolve under the
+// project subpath https://<user>.github.io/don-portfolio/.
+const base = process.env.GITHUB_PAGES === 'true' ? '/don-portfolio/' : '/'
+
 export default defineConfig({
+  base,
   plugins: [react()],
   server: {
     host: true,
