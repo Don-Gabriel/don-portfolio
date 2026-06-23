@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './admin.css'
+import { Ico, type IconName } from '../jarvis/Icons'
 import {
   snapshot,
   saveSnapshot,
@@ -46,12 +47,12 @@ export default function AdminApp() {
     0,
   )
 
-  const NAV: { id: Section; label: string }[] = [
-    { id: 'dashboard', label: '◧  Dashboard' },
-    { id: 'identity', label: '◉  Identity' },
-    { id: 'galaxies', label: '✦  Galaxies & Projects' },
-    { id: 'memories', label: '⬢  Memory Realms' },
-    { id: 'data', label: '⤓  Data & Backup' },
+  const NAV: { id: Section; label: string; ico: IconName }[] = [
+    { id: 'dashboard', label: 'Dashboard', ico: 'systems' },
+    { id: 'identity', label: 'Identity', ico: 'command' },
+    { id: 'galaxies', label: 'Galaxies & Projects', ico: 'matrix' },
+    { id: 'memories', label: 'Memory Realms', ico: 'academy' },
+    { id: 'data', label: 'Data & Backup', ico: 'download' },
   ]
 
   return (
@@ -65,10 +66,10 @@ export default function AdminApp() {
         <span className="crumb">J.A.R.V.I.S. — control deck</span>
         <div className="a-actions">
           <a className="a-btn" href="/" target="_blank" rel="noreferrer">
-            View universe ↗
+            View live site <Ico name="external" size={14} />
           </a>
           <button className="a-btn primary" onClick={save}>
-            Save changes
+            <Ico name="download" size={14} /> Save changes
           </button>
         </div>
       </div>
@@ -78,12 +79,14 @@ export default function AdminApp() {
           <button
             key={n.id}
             className={`a-nav ${section === n.id ? 'active' : ''}`}
+            aria-current={section === n.id ? 'page' : undefined}
             onClick={() => {
               setSection(n.id)
               setSelGalaxy(null)
               setSelEntity(null)
             }}
           >
+            <span className="ico"><Ico name={n.ico} size={17} /></span>
             {n.label}
           </button>
         ))}
@@ -112,7 +115,11 @@ export default function AdminApp() {
         {section === 'data' && <DataPanel snap={snap} setSnap={setSnap} />}
       </main>
 
-      {saved && <div className="a-toast">✓ Saved &amp; applied</div>}
+      {saved && (
+        <div className="a-toast">
+          <Ico name="command" size={14} /> Saved &amp; applied
+        </div>
+      )}
     </div>
   )
 }

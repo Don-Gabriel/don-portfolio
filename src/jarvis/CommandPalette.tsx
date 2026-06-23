@@ -88,6 +88,16 @@ export function CommandPalette() {
         },
       })
     }
+    actions.push({
+      id: 'admin',
+      label: 'Open Command Center',
+      hint: 'ADMIN',
+      icon: 'command',
+      keywords: 'admin editor dashboard manage content',
+      run: () => {
+        window.location.href = '/admin'
+      },
+    })
     return [...jump, ...projectCmds, ...actions]
   }, [open])
 
