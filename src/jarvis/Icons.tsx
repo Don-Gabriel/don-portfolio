@@ -13,6 +13,7 @@ export type IconName =
   | 'academy'
   | 'honors'
   | 'comms'
+  | 'memory'
   | 'sound-on'
   | 'sound-off'
   | 'close'
@@ -70,6 +71,13 @@ const P: Record<IconName, JSX.Element> = {
       <path d="M4 5h16v11H7l-3 3V5Z" />
       <path d="M8 9h8" />
       <path d="M8 12h5" />
+    </>
+  ),
+  memory: (
+    <>
+      <path d="M12 3 3.5 7.5 12 12l8.5-4.5L12 3Z" />
+      <path d="M3.5 12 12 16.5 20.5 12" />
+      <path d="M3.5 16.5 12 21l8.5-4.5" />
     </>
   ),
   'sound-on': (

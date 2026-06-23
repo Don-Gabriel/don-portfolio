@@ -13,7 +13,7 @@ import { CommandPalette } from './CommandPalette'
 import { Toasts, toast } from './Toasts'
 import { stagger, fadeRise, spring, viewContainer, backdrop, dialogPanel } from './motion'
 import { useJarvis, type ModuleId } from '../state/useJarvis'
-import { UNIVERSE, IDENTITY, galaxyById, type Entity } from '../data/universe'
+import { UNIVERSE, IDENTITY, MEMORIES, galaxyById, type Entity, type MemoryItem } from '../data/universe'
 import { coverArt } from '../art/cover'
 import { getAudio } from '../audio/AudioEngine'
 
@@ -24,6 +24,7 @@ const MODULES: { id: ModuleId; label: string; ico: IconName }[] = [
   { id: 'experience', label: 'Career', ico: 'career' },
   { id: 'education', label: 'Academy', ico: 'academy' },
   { id: 'achievements', label: 'Honors', ico: 'honors' },
+  { id: 'memory', label: 'Archive', ico: 'memory' },
   { id: 'contact', label: 'Comms', ico: 'comms' },
 ]
 
@@ -34,6 +35,7 @@ const JARVIS_LINES: Record<ModuleId, string> = {
   experience: 'Field-deployment history. Currently active.',
   education: 'Training records and credentials on file.',
   achievements: 'Commendations logged. The 3LC victory is, I must say, rather impressive.',
+  memory: 'The Archive — moments worth stepping back into. Memories, not records.',
   contact: 'Opening a secure channel. Mr. Gabriel is available for work.',
 }
 
@@ -225,6 +227,7 @@ function View({ module }: { module: ModuleId }) {
   if (module === 'home') return <Home />
   if (module === 'projects') return <Projects />
   if (module === 'skills') return <Skills />
+  if (module === 'memory') return <Memories />
   if (module === 'contact') return <Contact />
   return <RowsView module={module} />
 }
@@ -417,6 +420,52 @@ function RowsView({ module }: { module: ModuleId }) {
             )}
           </motion.div>
         ))}
+      </div>
+    </motion.div>
+  )
+}
+
+function Memories() {
+  return (
+    <motion.div className="view" variants={viewContainer} initial="hidden" animate="show" exit="exit">
+      <ViewHead idx="06" title="MEMORY REALMS" sub={`${MEMORIES.length} archived · moments you can step inside`} />
+      {MEMORIES.length === 0 ? (
+        <motion.div className="empty-realm" variants={fadeRise}>
+          No memories archived yet. Add them in the Command Center.
+        </motion.div>
+      ) : (
+        <div className="realms">
+          {MEMORIES.map((m) => (
+            <MemoryCard key={m.id} m={m} />
+          ))}
+        </div>
+      )}
+    </motion.div>
+  )
+}
+
+function MemoryCard({ m }: { m: MemoryItem }) {
+  const cover = m.image || coverArt(m.id, m.color)
+  return (
+    <motion.div
+      className="realm"
+      variants={fadeRise}
+      style={{ '--accent': m.color } as React.CSSProperties}
+      onMouseEnter={() => {
+        try {
+          getAudio().hover()
+        } catch {
+          /* idle */
+        }
+      }}
+    >
+      <div className="realm-cover" style={{ backgroundImage: `url(${cover})` }}>
+        <span className="card-scan" aria-hidden="true" />
+        {m.year && <span className="realm-year">{m.year}</span>}
+      </div>
+      <div className="realm-body">
+        <div className="realm-title">{m.title}</div>
+        <p className="realm-caption">{m.caption}</p>
       </div>
     </motion.div>
   )

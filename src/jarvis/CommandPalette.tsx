@@ -23,6 +23,7 @@ const MODULE_CMDS: { id: ModuleId; label: string; icon: IconName }[] = [
   { id: 'experience', label: 'Career Log', icon: 'career' },
   { id: 'education', label: 'Academy', icon: 'academy' },
   { id: 'achievements', label: 'Honors', icon: 'honors' },
+  { id: 'memory', label: 'Memory Realms', icon: 'memory' },
   { id: 'contact', label: 'Comms', icon: 'comms' },
 ]
 

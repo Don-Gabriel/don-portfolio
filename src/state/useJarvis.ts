@@ -8,6 +8,7 @@ export type ModuleId =
   | 'experience'
   | 'education'
   | 'achievements'
+  | 'memory'
   | 'contact'
 
 interface JarvisState {
