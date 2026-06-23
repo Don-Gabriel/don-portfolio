@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Reactor } from './Reactor'
 import { IDENTITY } from '../data/universe'
+import { getAudio } from '../audio/AudioEngine'
 
 /**
  * Power-up sequence: the arc reactor charges while JARVIS runs diagnostics,
@@ -39,6 +40,14 @@ export function Boot({ onDone }: { onDone: () => void }) {
   }, [onDone])
 
   const skip = () => {
+    // a click is a user gesture — safe to boot the audio context and greet
+    try {
+      const a = getAudio()
+      a.init()
+      a.power()
+    } catch {
+      /* audio unavailable */
+    }
     setCharge(100)
     setDone(true)
     setTimeout(onDone, 200)

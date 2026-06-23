@@ -127,7 +127,7 @@ export function CommandPalette() {
       setQ('')
       setActive(0)
       try {
-        getAudio().blip(4)
+        getAudio().open()
       } catch {
         /* idle */
       }
@@ -139,11 +139,20 @@ export function CommandPalette() {
     setActive((a) => Math.min(a, Math.max(0, filtered.length - 1)))
   }, [filtered.length])
 
+  const dismiss = () => {
+    try {
+      getAudio().close()
+    } catch {
+      /* idle */
+    }
+    setOpen(false)
+  }
+
   const exec = (c?: Command) => {
     if (!c) return
     c.run()
     try {
-      getAudio().blip(2)
+      getAudio().click()
     } catch {
       /* idle */
     }
@@ -152,12 +161,14 @@ export function CommandPalette() {
 
   const onKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
-      setOpen(false)
+      dismiss()
     } else if (e.key === 'ArrowDown') {
       e.preventDefault()
+      getAudio().hover()
       setActive((a) => (a + 1) % Math.max(1, filtered.length))
     } else if (e.key === 'ArrowUp') {
       e.preventDefault()
+      getAudio().hover()
       setActive((a) => (a - 1 + filtered.length) % Math.max(1, filtered.length))
     } else if (e.key === 'Enter') {
       e.preventDefault()
@@ -174,7 +185,7 @@ export function CommandPalette() {
           initial="hidden"
           animate="show"
           exit="exit"
-          onClick={() => setOpen(false)}
+          onClick={dismiss}
         >
           <motion.div
             className="cmdk-panel"

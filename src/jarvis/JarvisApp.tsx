@@ -158,12 +158,14 @@ function Rail() {
           aria-current={module === m.id ? 'page' : undefined}
           className={`rail-btn ${module === m.id ? 'active' : ''}`}
           onClick={() => {
+            // module change fires nav() in AudioController; play a click only
+            // when re-selecting the current module so there's always feedback
+            if (useJarvis.getState().module === m.id) getAudio().click()
             useJarvis.getState().openModule(m.id)
-            getAudio().blip(2)
           }}
           onMouseEnter={() => {
             try {
-              getAudio().blip(1)
+              getAudio().hover()
             } catch {
               /* audio idle */
             }
@@ -301,6 +303,13 @@ function Projects() {
             key={e.id}
             className="card"
             variants={fadeRise}
+            onMouseEnter={() => {
+              try {
+                getAudio().hover()
+              } catch {
+                /* idle */
+              }
+            }}
             onClick={() => useJarvis.getState().openDetail(e.id)}
           >
             <div className="cover" style={{ backgroundImage: `url(${coverArt(e.id, g.color)})` }} />
@@ -456,9 +465,13 @@ function Contact() {
 /* ───────── detail overlay (focus-trapped dialog) ───────── */
 function Detail({ entity, accent }: { entity: Entity; accent?: string }) {
   const panelRef = useRef<HTMLDivElement>(null)
-  const close = () => useJarvis.getState().openDetail(null)
+  const close = () => {
+    getAudio().close()
+    useJarvis.getState().openDetail(null)
+  }
 
   useEffect(() => {
+    getAudio().open()
     const prevFocus = document.activeElement as HTMLElement | null
     // focus the panel for screen readers + keyboard
     panelRef.current?.focus()

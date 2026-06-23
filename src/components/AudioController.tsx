@@ -1,27 +1,19 @@
 import { useEffect } from 'react'
-import { useJarvis, type ModuleId } from '../state/useJarvis'
+import { useJarvis } from '../state/useJarvis'
 import { getAudio } from '../audio/AudioEngine'
 
-/** Bridges HUD state to the generative music engine. */
-const MOOD: Record<ModuleId, string> = {
-  home: 'identity',
-  projects: 'projects',
-  skills: 'knowledge',
-  experience: 'experience',
-  education: 'education',
-  achievements: 'achievements',
-  contact: 'identity',
-}
-
+/**
+ * Bridges HUD state to the SFX engine: boots the audio context on the first
+ * user gesture, keeps it in sync with the mute toggle, and fires a navigation
+ * sweep whenever the active module changes.
+ */
 export function AudioController() {
   useEffect(() => {
     const audio = getAudio()
 
     const start = () => {
       audio.init()
-      const s = useJarvis.getState()
-      audio.setMuted(s.muted)
-      audio.setMood(MOOD[s.module])
+      audio.setMuted(useJarvis.getState().muted)
     }
     window.addEventListener('pointerdown', start, { once: true })
 
@@ -34,7 +26,7 @@ export function AudioController() {
       }
       if (s.module !== prevModule) {
         prevModule = s.module
-        audio.setMood(MOOD[s.module])
+        audio.nav()
       }
     })
 

@@ -53,10 +53,18 @@ export function HudButton({
   }
   const onEnter = () => {
     try {
-      getAudio().blip(gold ? 3 : 1)
+      getAudio().hover(gold)
     } catch {
       /* audio not yet initialised — ignore */
     }
+  }
+  const handleClick = () => {
+    try {
+      getAudio().click()
+    } catch {
+      /* audio idle */
+    }
+    onClick?.()
   }
 
   const cls = `hbtn reactive ${gold ? 'gold' : ''} ${solid ? 'solid' : ''} ${className}`
@@ -72,14 +80,14 @@ export function HudButton({
 
   if (href) {
     return (
-      <motion.a {...common} href={href} target={target} rel="noreferrer" onClick={onClick}>
+      <motion.a {...common} href={href} target={target} rel="noreferrer" onClick={handleClick}>
         <span className="hbtn-glow" />
         <span className="hbtn-inner">{children}</span>
       </motion.a>
     )
   }
   return (
-    <motion.button {...common} onClick={onClick}>
+    <motion.button {...common} onClick={handleClick}>
       <span className="hbtn-glow" />
       <span className="hbtn-inner">{children}</span>
     </motion.button>
