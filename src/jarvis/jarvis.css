@@ -1,19 +1,86 @@
-.hud {
+/* ═══════════════════════════════════════════════════════════════════
+   DESIGN TOKENS — single source of truth for the HUD.
+   Colour ramp, spacing scale, type scale, radii, elevation, z-index.
+   ═══════════════════════════════════════════════════════════════════ */
+:root {
+  /* core palette */
   --cyan: #4fe3ff;
-  --cyan-soft: rgba(79, 227, 255, 0.55);
-  --cyan-faint: rgba(79, 227, 255, 0.14);
+  --cyan-hi: #8af0ff;
   --gold: #ffc24d;
   --red: #ff4d6a;
+  --green: #51ff9a;
   --bg: #04070f;
   --bg2: #07101f;
+
+  /* cyan alpha ramp (replaces scattered rgba literals) */
+  --cyan-90: rgba(79, 227, 255, 0.9);
+  --cyan-soft: rgba(79, 227, 255, 0.55);
+  --cyan-40: rgba(79, 227, 255, 0.4);
+  --cyan-22: rgba(79, 227, 255, 0.22);
+  --cyan-16: rgba(79, 227, 255, 0.16);
+  --cyan-faint: rgba(79, 227, 255, 0.14);
+  --cyan-08: rgba(79, 227, 255, 0.08);
+  --cyan-05: rgba(79, 227, 255, 0.05);
+  /* gold alpha ramp */
+  --gold-60: rgba(255, 194, 77, 0.6);
+  --gold-40: rgba(255, 194, 77, 0.4);
+  --gold-18: rgba(255, 194, 77, 0.18);
+  --gold-07: rgba(255, 194, 77, 0.07);
+
   --glass: rgba(8, 18, 34, 0.55);
+  --glass-hi: rgba(12, 26, 46, 0.72);
   --text: #d4ecff;
   --dim: rgba(212, 236, 255, 0.55);
   --line: rgba(79, 227, 255, 0.22);
+
+  /* spacing scale (rem) */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.4rem;
+  --s-6: 2rem;
+  --s-7: 2.8rem;
+  --s-8: 4rem;
+
+  /* type scale */
+  --t-xs: 0.62rem;
+  --t-sm: 0.74rem;
+  --t-md: 0.92rem;
+  --t-lg: 1.2rem;
+  --t-xl: 1.6rem;
+  --t-2xl: clamp(2rem, 5vw, 3.6rem);
+
+  /* radii + elevation */
+  --r-sm: 4px;
+  --r-md: 12px;
+  --bevel: 8px;
+  --elev-1: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --elev-2: 0 14px 40px rgba(0, 0, 0, 0.5);
+  --glow-cyan: 0 0 20px var(--cyan-40);
+  --glow-gold: 0 0 20px var(--gold-40);
+
+  /* motion */
+  --ease-hud: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 0.18s;
+  --dur-mid: 0.28s;
+
+  /* z-index scale — named, no magic 9999s */
+  --z-backdrop: 0;
+  --z-fx: 2;
+  --z-content: 5;
+  --z-corner: 6;
+  --z-chrome: 7;
+  --z-overlay: 8;
+  --z-boot: 100;
+  --z-reticle: 9999;
+
   --disp: 'Orbitron', sans-serif;
   --hudf: 'Rajdhani', sans-serif;
   --mono: 'JetBrains Mono', monospace;
+}
 
+.hud {
   position: fixed;
   inset: 0;
   overflow: hidden;
@@ -617,4 +684,30 @@
   .stage { inset: 54px 0 64px 0; }
   .view { padding: 1rem 1.1rem 2rem; }
   .jarvis-line { display: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   REDUCED MOTION — honour the OS preference. Kills the perpetual
+   loops (scan, spin, particle drift) and snaps transitions short,
+   while keeping the HUD fully legible and usable.
+   ═══════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  .hud-scan,
+  .rg-slow,
+  .rg-rev,
+  .rg-fast,
+  .r-core,
+  .r-tri,
+  .brand .led,
+  .jarvis-line .cursor {
+    animation: none !important;
+  }
+  .view,
+  .detail { animation-duration: 0.001s !important; }
+  .bar .fill { animation: none !important; }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.001s !important;
+  }
 }
