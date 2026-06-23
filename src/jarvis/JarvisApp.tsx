@@ -1,22 +1,27 @@
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import './jarvis.css'
 import { Background } from './Background'
 import { Reticle } from './Reticle'
 import { Reactor } from './Reactor'
 import { Boot } from './Boot'
+import { Scramble } from './Scramble'
+import { HudButton } from './HudButton'
+import { Ico, type IconName } from './Icons'
+import { stagger, fadeRise, spring } from './motion'
 import { useJarvis, type ModuleId } from '../state/useJarvis'
 import { UNIVERSE, IDENTITY, galaxyById, type Entity } from '../data/universe'
 import { coverArt } from '../art/cover'
 import { getAudio } from '../audio/AudioEngine'
 
-const MODULES: { id: ModuleId; label: string; ico: string }[] = [
-  { id: 'home', label: 'Home', ico: '⌂' },
-  { id: 'projects', label: 'Systems', ico: '◳' },
-  { id: 'skills', label: 'Matrix', ico: '⊞' },
-  { id: 'experience', label: 'Career', ico: '◈' },
-  { id: 'education', label: 'Academy', ico: '⌬' },
-  { id: 'achievements', label: 'Honors', ico: '★' },
-  { id: 'contact', label: 'Comms', ico: '✦' },
+const MODULES: { id: ModuleId; label: string; ico: IconName }[] = [
+  { id: 'home', label: 'Home', ico: 'home' },
+  { id: 'projects', label: 'Systems', ico: 'systems' },
+  { id: 'skills', label: 'Matrix', ico: 'matrix' },
+  { id: 'experience', label: 'Career', ico: 'career' },
+  { id: 'education', label: 'Academy', ico: 'academy' },
+  { id: 'achievements', label: 'Honors', ico: 'honors' },
+  { id: 'contact', label: 'Comms', ico: 'comms' },
 ]
 
 const JARVIS_LINES: Record<ModuleId, string> = {
@@ -104,13 +109,25 @@ function Rail() {
       {MODULES.map((m) => (
         <button
           key={m.id}
+          aria-label={m.label}
+          aria-current={module === m.id ? 'page' : undefined}
           className={`rail-btn ${module === m.id ? 'active' : ''}`}
           onClick={() => {
             useJarvis.getState().openModule(m.id)
             getAudio().blip(2)
           }}
+          onMouseEnter={() => {
+            try {
+              getAudio().blip(1)
+            } catch {
+              /* audio idle */
+            }
+          }}
         >
-          <span className="ico">{m.ico}</span>
+          <span className="lock" aria-hidden="true" />
+          <span className="ico">
+            <Ico name={m.ico} size={20} />
+          </span>
           {m.label}
         </button>
       ))}
@@ -160,24 +177,47 @@ function View({ module }: { module: ModuleId }) {
 
 function Home() {
   return (
-    <div className="home">
-      <Reactor size={250} />
-      <div className="role">{IDENTITY.role}</div>
-      <h1>{IDENTITY.name}</h1>
-      <div className="tagline">{IDENTITY.tagline}</div>
-      <div className="chips">
+    <motion.div
+      className="home"
+      variants={stagger(0.16, 0.1)}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.div
+        variants={{
+          hidden: { opacity: 0, scale: 0.82 },
+          show: { opacity: 1, scale: 1, transition: { ...spring, delay: 0.05 } },
+        }}
+      >
+        <Reactor size={250} />
+      </motion.div>
+      <motion.div className="role" variants={fadeRise}>
+        {IDENTITY.role}
+      </motion.div>
+      <motion.h1 variants={fadeRise}>
+        <Scramble text={IDENTITY.name} delay={520} speed={26} />
+      </motion.h1>
+      <motion.div className="tagline" variants={fadeRise}>
+        {IDENTITY.tagline}
+      </motion.div>
+      <motion.div className="chips" variants={fadeRise}>
         <span className="chip">◉ {IDENTITY.location}</span>
-        {IDENTITY.available && <span className="chip">● Available for work</span>}
-      </div>
-      <div className="chips" style={{ marginTop: '1.4rem' }}>
-        <button className="hbtn" onClick={() => useJarvis.getState().openModule('projects')}>
-          ◳ View systems
-        </button>
-        <button className="hbtn gold" onClick={() => useJarvis.getState().openModule('contact')}>
-          ✦ Initiate contact
-        </button>
-      </div>
-    </div>
+        {IDENTITY.available && (
+          <span className="chip chip-live">
+            <span className="pip" />
+            Available for work
+          </span>
+        )}
+      </motion.div>
+      <motion.div className="chips" style={{ marginTop: 'var(--s-5)' }} variants={fadeRise}>
+        <HudButton onClick={() => useJarvis.getState().openModule('projects')}>
+          <Ico name="systems" /> View systems
+        </HudButton>
+        <HudButton gold onClick={() => useJarvis.getState().openModule('contact')}>
+          <Ico name="comms" /> Initiate contact
+        </HudButton>
+      </motion.div>
+    </motion.div>
   )
 }
 

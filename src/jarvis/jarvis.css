@@ -280,9 +280,10 @@
   transition: all 0.25s;
 }
 .rail-btn .ico {
-  font-size: 1.1rem;
+  display: grid;
+  place-items: center;
   line-height: 1;
-  filter: grayscale(0.4);
+  opacity: 0.7;
   transition: all 0.25s;
 }
 .rail-btn:hover {
@@ -290,12 +291,33 @@
   background: var(--glass);
   border-color: var(--line);
 }
+.rail-btn:hover .ico { opacity: 1; }
 .rail-btn.active {
   color: var(--cyan);
-  background: rgba(79, 227, 255, 0.08);
+  background: var(--cyan-08);
   border-color: var(--line);
 }
-.rail-btn.active .ico { filter: none; text-shadow: 0 0 12px var(--cyan); }
+.rail-btn.active .ico { opacity: 1; filter: drop-shadow(0 0 8px var(--cyan)); }
+/* targeting lock-on brackets that snap in on hover/active */
+.rail-btn .lock {
+  position: absolute;
+  inset: 5px;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(1.18);
+  transition: opacity var(--dur-fast) ease, transform var(--dur-fast) var(--ease-hud);
+  background:
+    linear-gradient(var(--cyan), var(--cyan)) 0 0 / 9px 1.5px no-repeat,
+    linear-gradient(var(--cyan), var(--cyan)) 0 0 / 1.5px 9px no-repeat,
+    linear-gradient(var(--cyan), var(--cyan)) 100% 0 / 9px 1.5px no-repeat,
+    linear-gradient(var(--cyan), var(--cyan)) 100% 0 / 1.5px 9px no-repeat,
+    linear-gradient(var(--cyan), var(--cyan)) 0 100% / 9px 1.5px no-repeat,
+    linear-gradient(var(--cyan), var(--cyan)) 0 100% / 1.5px 9px no-repeat,
+    linear-gradient(var(--cyan), var(--cyan)) 100% 100% / 9px 1.5px no-repeat,
+    linear-gradient(var(--cyan), var(--cyan)) 100% 100% / 1.5px 9px no-repeat;
+}
+.rail-btn:hover .lock,
+.rail-btn.active .lock { opacity: 0.75; transform: scale(1); }
 .rail-btn.active::before {
   content: '';
   position: absolute;
@@ -450,7 +472,50 @@
 .hbtn.gold { color: var(--gold); border-color: rgba(255, 194, 77, 0.6); background: rgba(255, 194, 77, 0.07); }
 .hbtn.gold:hover { background: rgba(255, 194, 77, 0.18); color: #fff; }
 .hbtn.solid { background: var(--cyan); color: #04070f; }
-.hbtn.solid:hover { background: #8af0ff; }
+.hbtn.solid:hover { background: var(--cyan-hi); }
+
+/* reactive variant — cursor-tracking glow + magnetic (framer) + press */
+.hbtn.reactive { overflow: hidden; isolation: isolate; --gx: 50%; --gy: 50%; }
+.hbtn.reactive .hbtn-inner {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.hbtn.reactive .hbtn-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0;
+  background: radial-gradient(
+    120px circle at var(--gx) var(--gy),
+    rgba(79, 227, 255, 0.35),
+    transparent 60%
+  );
+  transition: opacity var(--dur-mid) ease;
+  pointer-events: none;
+}
+.hbtn.reactive.gold .hbtn-glow {
+  background: radial-gradient(120px circle at var(--gx) var(--gy), rgba(255, 194, 77, 0.35), transparent 60%);
+}
+.hbtn.reactive:hover .hbtn-glow { opacity: 1; }
+.hbtn .hbtn-inner svg { flex-shrink: 0; }
+
+/* live "available" chip with pulsing pip */
+.chip-live { display: inline-flex; align-items: center; gap: 0.45rem; color: var(--green); border-color: rgba(81, 255, 154, 0.35); }
+.chip-live .pip {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: pip 1.8s ease-in-out infinite;
+}
+@keyframes pip {
+  0%, 100% { box-shadow: 0 0 4px var(--green); opacity: 0.7; }
+  50% { box-shadow: 0 0 12px var(--green); opacity: 1; }
+}
 
 .chip {
   font-family: var(--mono);
