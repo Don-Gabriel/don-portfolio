@@ -72,7 +72,7 @@ export function HudButton({
 
   if (href) {
     return (
-      <motion.a {...common} href={href} target={target} rel="noreferrer">
+      <motion.a {...common} href={href} target={target} rel="noreferrer" onClick={onClick}>
         <span className="hbtn-glow" />
         <span className="hbtn-inner">{children}</span>
       </motion.a>

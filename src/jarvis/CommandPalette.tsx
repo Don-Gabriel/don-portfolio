@@ -4,6 +4,7 @@ import { useJarvis, type ModuleId } from '../state/useJarvis'
 import { UNIVERSE, galaxyById } from '../data/universe'
 import { getAudio } from '../audio/AudioEngine'
 import { Ico, type IconName } from './Icons'
+import { toast } from './Toasts'
 import { backdrop } from './motion'
 
 interface Command {
@@ -67,7 +68,11 @@ export function CommandPalette() {
         label: muted ? 'Enable sound' : 'Mute sound',
         hint: 'ACTION',
         icon: muted ? 'sound-off' : 'sound-on',
-        run: () => useJarvis.getState().toggleMute(),
+        run: () => {
+          useJarvis.getState().toggleMute()
+          const nowMuted = useJarvis.getState().muted
+          toast(nowMuted ? 'Audio offline' : 'Audio online', nowMuted ? 'sound-off' : 'sound-on')
+        },
       },
     ]
     const resume = UNIVERSE.identity.resumeUrl
@@ -77,7 +82,10 @@ export function CommandPalette() {
         label: 'Download résumé',
         hint: 'ACTION',
         icon: 'download',
-        run: () => window.open(resume, '_blank', 'noreferrer'),
+        run: () => {
+          window.open(resume, '_blank', 'noreferrer')
+          toast('Résumé transmitted', 'download')
+        },
       })
     }
     return [...jump, ...projectCmds, ...actions]

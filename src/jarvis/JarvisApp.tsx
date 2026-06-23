@@ -10,6 +10,7 @@ import { HudButton } from './HudButton'
 import { Ico, type IconName } from './Icons'
 import { CountUp, MetricValue } from './CountUp'
 import { CommandPalette } from './CommandPalette'
+import { Toasts, toast } from './Toasts'
 import { stagger, fadeRise, spring, viewContainer, backdrop, dialogPanel } from './motion'
 import { useJarvis, type ModuleId } from '../state/useJarvis'
 import { UNIVERSE, IDENTITY, galaxyById, type Entity } from '../data/universe'
@@ -99,6 +100,7 @@ export default function JarvisApp() {
         <JarvisLine module={module} muted={muted} />
 
         <CommandPalette />
+        <Toasts />
         <Reticle />
         {!booted && <Boot onDone={() => useJarvis.getState().setBooted(true)} />}
       </div>
@@ -201,7 +203,11 @@ function JarvisLine({ module, muted }: { module: ModuleId; muted: boolean }) {
       </span>
       <button
         className={`snd ${muted ? '' : 'on'}`}
-        onClick={() => useJarvis.getState().toggleMute()}
+        onClick={() => {
+          useJarvis.getState().toggleMute()
+          const nowMuted = useJarvis.getState().muted
+          toast(nowMuted ? 'Audio offline' : 'Audio online', nowMuted ? 'sound-off' : 'sound-on')
+        }}
         aria-label={muted ? 'Sound off — click to enable' : 'Sound on — click to mute'}
         aria-pressed={!muted}
       >
@@ -432,7 +438,12 @@ function Contact() {
             </HudButton>
           ))}
           {IDENTITY.resumeUrl && (
-            <HudButton solid href={IDENTITY.resumeUrl} target="_blank">
+            <HudButton
+              solid
+              href={IDENTITY.resumeUrl}
+              target="_blank"
+              onClick={() => toast('Résumé transmitted', 'download')}
+            >
               <Ico name="download" size={15} /> Résumé
             </HudButton>
           )}
